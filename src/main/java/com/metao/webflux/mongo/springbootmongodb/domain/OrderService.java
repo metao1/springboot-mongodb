@@ -23,7 +23,7 @@ public class OrderService {
 
     private Flux<OrderDoc> buildOrder(Function<OrderDoc, Publisher<OrderDoc>> callback, String[] productIds) {
         return Flux
-                .just(productIds)                
+                .just(productIds)
                 .filter(productId -> productId != null && !productId.isEmpty())
                 .map(pid -> new OrderDoc(pid, pid))
                 .flatMap(callback);
