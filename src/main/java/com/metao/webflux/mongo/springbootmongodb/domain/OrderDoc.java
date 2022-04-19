@@ -10,12 +10,19 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-@Document(collection = "orders")
+@Document(collection = "order")
 public class OrderDoc {
 
     @Id
     private String id;
 
     private String productId;
-    
+
+    @Override
+    public String toString() {
+        return "OrderDoc{" +
+                "id='" + id + '\'' +
+                ", productId='" + productId + '\'' +
+                '}';
+    }
 }

@@ -5,7 +5,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import com.metao.webflux.mongo.springbootmongodb.application.TransactionConfiguration;
+import com.metao.webflux.mongo.springbootmongodb.application.MongoConfig;
+import com.metao.webflux.mongo.springbootmongodb.application.TransactionConfig;
 import com.metao.webflux.mongo.springbootmongodb.domain.OrderDoc;
 import com.metao.webflux.mongo.springbootmongodb.domain.OrderRepository;
 import com.metao.webflux.mongo.springbootmongodb.domain.OrderService;
@@ -22,7 +23,7 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 @SpringBootTest
-@Import({ TransactionConfiguration.class, OrderService.class })
+@Import({ TransactionConfig.class, OrderService.class, MongoConfig.class })
 public class TailableOrderQueryTest extends BaseTestContainer {
 
     @Autowired
@@ -33,16 +34,15 @@ public class TailableOrderQueryTest extends BaseTestContainer {
 
     @BeforeEach
     void beforeEach() {
-        var capped = CollectionOptions
-                .empty()
-                .size(1024 * 1024)
-                .maxDocuments(10)
-                .maxDocuments(100).capped();
-        var recreateCollection = mongoTemplate
-                .collectionExists(OrderDoc.class)
-                .flatMap(exists -> exists ? mongoTemplate.dropCollection(OrderDoc.class)
-                        : Mono.empty())
-                .then(mongoTemplate.createCollection(OrderDoc.class, capped));
+        var recreateCollection = mongoTemplate.dropCollection(OrderDoc.class)
+                .then(Mono.defer(() -> {
+                    var capped = CollectionOptions
+                            .empty()
+                            .size(1024 * 1024)
+                            .maxDocuments(100)
+                            .capped();
+                    return mongoTemplate.createCollection(OrderDoc.class, capped);
+                }));
 
         StepVerifier.create(recreateCollection)
                 .expectNextCount(1)
@@ -69,6 +69,13 @@ public class TailableOrderQueryTest extends BaseTestContainer {
                 .subscribe();
 
         assertThat(orders).hasSize(2);
+
+        StepVerifier
+                .create(write().then(write()))
+                .expectNextCount(1)
+                .verifyComplete();
+
+        assertThat(orders).hasSize(4);
     }
 
     private Mono<OrderDoc> write() {

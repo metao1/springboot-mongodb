@@ -1,6 +1,6 @@
 package com.metao.webflux.mongo.springbootmongodb;
 
-import com.metao.webflux.mongo.springbootmongodb.application.TransactionConfiguration;
+import com.metao.webflux.mongo.springbootmongodb.application.TransactionConfig;
 import com.metao.webflux.mongo.springbootmongodb.domain.OrderDoc;
 import com.metao.webflux.mongo.springbootmongodb.domain.OrderRepository;
 import com.metao.webflux.mongo.springbootmongodb.domain.OrderService;
@@ -15,7 +15,7 @@ import org.springframework.data.mongodb.core.ReactiveMongoTemplate;
 import reactor.test.StepVerifier;
 
 @SpringBootTest
-@Import({ TransactionConfiguration.class, OrderService.class })
+@Import({ TransactionConfig.class, OrderService.class })
 public class OrderServiceTests extends BaseTestContainer {
 
         @Autowired

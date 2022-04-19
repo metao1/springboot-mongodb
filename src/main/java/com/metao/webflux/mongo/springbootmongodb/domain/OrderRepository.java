@@ -11,4 +11,7 @@ public interface OrderRepository extends ReactiveMongoRepository<OrderDoc, Strin
 
     @Tailable
     Flux<OrderDoc> findByProductId(String productId);
+
+    @Tailable
+    Flux<OrderDoc> findBy();
 }
